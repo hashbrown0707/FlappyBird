@@ -11,7 +11,7 @@ namespace Flappy_Bird
 {
     class Game
     {
-        private static int GRAVITY = 10;
+        private const int GRAVITY = 10;
 
         public Random random;
 
@@ -20,7 +20,9 @@ namespace Flappy_Bird
             this.random = random;
         }
 
-        int pipeSpace;     //水管中間長
+        private int score;
+
+        private int pipeSpace;     //水管中間長
 
         public void DoBird(Bird bird, int timeStep)
         {
@@ -56,6 +58,34 @@ namespace Flappy_Bird
             int upHeight = downHeight + pipeSpace;
             List<Pipe> pipes = new List<Pipe>{ new PipeUp(upHeight, pipeMoveSpeed), new PipeDown(downHeight, pipeMoveSpeed) };
             return pipes;
+        }
+
+        public void CheckScore(Bird bird, List<Pipe> pipes, Label scoreLabel)
+        {
+            if (pipes != null)
+                foreach (Pipe pipe in pipes)
+                    if (pipe.Location.X == bird.Location.X)
+                        score++;
+            scoreLabel.Text = "Score : " + (score / 2).ToString();
+        }
+
+        public bool CheckGameOver(Bird bird, Ground ground, List<Pipe> pipes)
+        {
+            Rectangle groundRect = new Rectangle(ground.Location, ground.Size);
+            if (bird.Bounds.IntersectsWith(groundRect))
+                return true;
+
+            if (pipes != null)
+            {
+                foreach (Pipe pipe in pipes)
+                {
+                    Rectangle pipeRect = new Rectangle(pipe.Location, pipe.Size);
+                    if (bird.Bounds.IntersectsWith(pipeRect))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private int GetBirdVolecityY(Bird bird)

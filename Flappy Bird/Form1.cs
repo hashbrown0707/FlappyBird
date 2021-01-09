@@ -21,7 +21,7 @@ namespace Flappy_Bird
         private Game game;
         private Bird bird;
         private Ground ground;
-        private Score scoreLabel;
+        private ScoreLabel scoreLabel;
         private List<Pipe> pipes;
 
         private MessageBoxIcon icon;
@@ -29,7 +29,6 @@ namespace Flappy_Bird
         private string text;
         private string caption;
         private bool canShow;
-        private int score;
 
         private int time;
         private int pipeSpawnTime;
@@ -37,10 +36,10 @@ namespace Flappy_Bird
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Initialize(new Game(new Random()), new Timer(), new Bird(100, 164, 50, 50, 20), new Ground(), new Score(), new List<Pipe>());
+            Initialize(new Game(new Random()), new Timer(), new Bird(100, 164, 50, 50, 20), new Ground(), new ScoreLabel(), new List<Pipe>());
         }
 
-        private void Initialize(Game game, Timer timer, Bird bird, Ground ground, Score scoreLabel, List<Pipe> pipes)    //Start
+        private void Initialize(Game game, Timer timer, Bird bird, Ground ground, ScoreLabel scoreLabel, List<Pipe> pipes)    //Start
         {
             this.timer = timer;
             timer.Interval = 25;
@@ -50,7 +49,6 @@ namespace Flappy_Bird
             this.game = game;
             this.bird = bird;
             this.ground = ground;
-            this.scoreLabel = scoreLabel;
             this.pipes = pipes;
             this.Controls.Add(bird);
             this.Controls.Add(ground);
@@ -63,7 +61,6 @@ namespace Flappy_Bird
             buttons = MessageBoxButtons.YesNo;
             text = "GAMEOVER, \n COUNTINUE?";
             caption = "GAMEOVER";
-            score = 0;
 
             canShow = true;
         }
@@ -75,6 +72,10 @@ namespace Flappy_Bird
 
             SpawnPipe();
             EndOrResetGame();
+            game.CheckScore(bird, pipes, scoreLabel);
+            PipeRecycle();
+            Console.WriteLine(GC.GetTotalMemory(false));
+            TransparetBackground(scoreLabel);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -94,42 +95,22 @@ namespace Flappy_Bird
                     foreach (Pipe pipe in pipes)
                         this.Controls.Add(pipe);
             }
+        }
 
+        private void PipeRecycle()
+        {
             if (pipes != null)
                 foreach (Pipe pipe in pipes)
                 {
-                    if (pipe.Location.X == bird.Location.X)
-                        score++;
-                    scoreLabel.Text = "Score : " + (score / 2).ToString();
-                        
                     pipe.Location = new Point(pipe.Location.X - pipe.moveSpeed, pipe.Location.Y);
                     if (pipe.Location.X <= -100)
                         this.Controls.Remove(pipe);
                 }
         }
 
-        private bool CheckGameOver()
-        {
-            Rectangle groundRect = new Rectangle(ground.Location, ground.Size);
-            if (bird.Bounds.IntersectsWith(groundRect))
-                return true;
-
-            if (pipes != null)
-            {
-                foreach (Pipe pipe in pipes)
-                {
-                    Rectangle pipeRect = new Rectangle(pipe.Location, pipe.Size);
-                    if (bird.Bounds.IntersectsWith(pipeRect))
-                        return true;
-                }
-            }
-            
-            return false;
-        }
-
         private void EndOrResetGame()
         {
-            if (CheckGameOver() && canShow)
+            if (game.CheckGameOver(bird, ground, pipes) && canShow)
             {
                 timer.Stop();
                 DialogResult result = MessageBox.Show(text, caption, buttons, icon);
@@ -139,13 +120,33 @@ namespace Flappy_Bird
                 {
                     case DialogResult.Yes:
                         this.Controls.Clear();
-                        Initialize(new Game(new Random()), new Timer(), new Bird(100, 164, 50, 50, 20), new Ground(), new Score(), new List<Pipe>());
+                        Initialize(new Game(new Random()), new Timer(), new Bird(100, 164, 50, 50, 20), new Ground(), new ScoreLabel(), new List<Pipe>());
                         break;
                     case DialogResult.No:
                         this.Close();
                         break;
                 }
             }
+        }
+
+        private void TransparetBackground(Control C)
+        {
+            C.Visible = false;
+
+            C.Refresh();
+            Application.DoEvents();
+
+            Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
+            int titleHeight = screenRectangle.Top - this.Top;
+            int Right = screenRectangle.Left - this.Left;
+
+            Bitmap bmp = new Bitmap(this.Width, this.Height);
+            this.DrawToBitmap(bmp, new Rectangle(0, 0, this.Width, this.Height));
+            Bitmap bmpImage = new Bitmap(bmp);
+            //bmp = bmpImage.Clone(new Rectangle(C.Location.X + Right, C.Location.Y + titleHeight, C.Width, C.Height), bmpImage.PixelFormat);
+            C.BackgroundImage = bmp;
+
+            C.Visible = true;
         }
     }
 }
