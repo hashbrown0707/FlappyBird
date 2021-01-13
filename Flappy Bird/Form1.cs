@@ -50,6 +50,7 @@ namespace Flappy_Bird
             this.bird = bird;
             this.ground = ground;
             this.pipes = pipes;
+            this.scoreLabel = scoreLabel;
             this.Controls.Add(bird);
             this.Controls.Add(ground);
             this.Controls.Add(scoreLabel);
@@ -71,11 +72,12 @@ namespace Flappy_Bird
             game.SetBirdVolecityY(bird, timer.Interval);
 
             SpawnPipe();
-            EndOrResetGame();
-            game.CheckScore(bird, pipes, scoreLabel);
             PipeRecycle();
-            Console.WriteLine(GC.GetTotalMemory(false));
-            TransparetBackground(scoreLabel);
+
+            game.CheckScore(bird, pipes, scoreLabel);
+            EndOrResetGame();
+            //Console.WriteLine(GC.GetTotalMemory(false));
+            //TransparetBackground(scoreLabel);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -129,24 +131,24 @@ namespace Flappy_Bird
             }
         }
 
-        private void TransparetBackground(Control C)
-        {
-            C.Visible = false;
+        //private void TransparetBackground(Control C)
+        //{
+        //    C.Visible = false;
 
-            C.Refresh();
-            Application.DoEvents();
+        //    C.Refresh();
+        //    Application.DoEvents();
 
-            Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
-            int titleHeight = screenRectangle.Top - this.Top;
-            int Right = screenRectangle.Left - this.Left;
+        //    Rectangle screenRectangle = RectangleToScreen(this.ClientRectangle);
+        //    int titleHeight = screenRectangle.Top - this.Top;
+        //    int Right = screenRectangle.Left - this.Left;
 
-            Bitmap bmp = new Bitmap(this.Width, this.Height);
-            this.DrawToBitmap(bmp, new Rectangle(0, 0, this.Width, this.Height));
-            Bitmap bmpImage = new Bitmap(bmp);
-            //bmp = bmpImage.Clone(new Rectangle(C.Location.X + Right, C.Location.Y + titleHeight, C.Width, C.Height), bmpImage.PixelFormat);
-            C.BackgroundImage = bmp;
+        //    Bitmap bmp = new Bitmap(this.Width, this.Height);
+        //    this.DrawToBitmap(bmp, new Rectangle(0, 0, this.Width, this.Height));
+        //    Bitmap bmpImage = new Bitmap(bmp);
+        //    bmp = bmpImage.Clone(new Rectangle(C.Location.X + Right, C.Location.Y + titleHeight, C.Width, C.Height), bmpImage.PixelFormat);
+        //    C.BackgroundImage = bmp;
 
-            C.Visible = true;
-        }
+        //    C.Visible = true;
+        //}
     }
 }
